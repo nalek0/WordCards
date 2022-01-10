@@ -22,8 +22,10 @@ namespace WordCards
 {
     public sealed partial class MainPage : Page
     {
+        // Properties:
         CardsList ListOfCards;
 
+        // Initialising:
         public MainPage()
         {
             this.InitializeComponent();
@@ -32,69 +34,41 @@ namespace WordCards
             initCards();
         }
 
-        private void initWindow()
+        void initWindow()
         {
             ApplicationView.GetForCurrentView()
-                .SetPreferredMinSize(new Size(400, 200));
+                .SetPreferredMinSize(new Size(700, 500));
         }
 
-        private async void initCards()
+        async void initCards()
         {
             ListOfCards = await CardsList.Import();
+            ListOfCards.CurrentCardChanged += new EventHandler(ShowCurrentCard);
             ListOfCards.Shuffle();
-            ShowCurrentCard();
         }
 
-        private void ClickedShuffle(object sender, RoutedEventArgs e)
+        // XAML Events:
+        void ClickedShuffle(object sender, RoutedEventArgs e)
         {
             ListOfCards.Shuffle();
-            ShowCurrentCard();
         }
 
-        private void ClickedIKnowIt(object sender, RoutedEventArgs e)
+        void ClickedIKnowIt(object sender, RoutedEventArgs e)
         {
-            if (ListOfCards.Empty())
-                return;
             ListOfCards.KnowCurrent();
         }
 
-        private void ClickedIDontKnowIt(object sender, RoutedEventArgs e)
+        void ClickedIDontKnowIt(object sender, RoutedEventArgs e)
         {
-            if (ListOfCards.Empty())
-                return;
             ListOfCards.DontKnowCurrent();
         }
 
-        private void ShowCurrentCard()
+        void ClickedCard(object sender, PointerRoutedEventArgs e)
         {
-            if (ListOfCards.Empty())
-            {
-                CardText.Text = "No cards in database!";
-            }
-            else
-            {
-                CardText.Text = ListOfCards.CurrentCard.ToString();
-            }
+            ListOfCards.ChangeCard();
         }
 
-        private void ClickedCard(object sender, PointerRoutedEventArgs e)
-        {
-            if (ListOfCards.Empty())
-                return;
-            if (ListOfCards.CurrentCard.Status == CardStatus.Reversed)
-            {
-                ListOfCards.CurrentCard.Status = CardStatus.Normal;
-                ListOfCards.Next();
-                ShowCurrentCard();
-            }
-            else
-            {
-                ListOfCards.CurrentCard.Status = CardStatus.Reversed;
-                ShowCurrentCard();
-            }
-        }
-
-        private void ClickedAddWord(object sender, RoutedEventArgs e)
+        void ClickedAddWord(object sender, RoutedEventArgs e)
         {
             WordCard newCard;
             try
@@ -106,6 +80,12 @@ namespace WordCards
             catch { return; }
 
             ListOfCards.AddCard(newCard);
+        }
+
+        // Methods:
+        void ShowCurrentCard(object sender, EventArgs args)
+        {
+            CardText.Text = ListOfCards.GetCurrentCardSide();
         }
     }
 }

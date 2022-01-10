@@ -13,27 +13,119 @@ namespace WordCards.Model
 {
     internal class CardsList
     {
-        private int CurrentCardIndex { get; set; } = 0;
-        private List<WordCard> Cards;
+        // Events:
+        public event EventHandler CardsChanged;
+        public event EventHandler CurrentCardChanged;
 
+        // Properties:
+        int index = 0;
+        int CurrentCardIndex {
+            get
+            {
+                return index;
+            } 
+            set
+            {
+                if (value < 0 || value > Cards.Count)
+                    throw new ArgumentOutOfRangeException("value");
+                index = value;
+                if (CurrentCardChanged != null)
+                    CurrentCardChanged(this, new EventArgs());
+            }
+        }
+        List<WordCard> Cards { get; set; }
         public WordCard CurrentCard { 
             get
             {
                 return Cards[CurrentCardIndex];
             } 
         }
-        
-        private void RotateToNormal()
+
+        // Constructors:
+        CardsList()
         {
-            foreach (var card in Cards)
+            Cards = new List<WordCard>();
+            CardsChanged += new EventHandler(UpdateCards);
+        }
+
+        CardsList(List<WordCard> cards) : this()
+        {
+            Cards = cards;
+        }
+
+
+        public static async Task<CardsList> Import()
+        {
+            StorageFile file = await ApplicationData.Current.LocalFolder.CreateFileAsync("words.xml", CreationCollisionOption.OpenIfExists);
+            Stream input = (await file.OpenReadAsync()).AsStreamForRead();
+            XmlTextReader xmlIn = new XmlTextReader(input);
+
+            try
             {
-                card.Status = CardStatus.Normal;
+                xmlIn.WhitespaceHandling = WhitespaceHandling.None;
+
+                xmlIn.MoveToContent();
+
+                if (xmlIn.Name != "CardsList")
+                    throw new ArgumentException("Incorrect file format.");
+
+                List<WordCard> cards = new List<WordCard>();
+
+                do
+                {
+                    if (!xmlIn.Read())
+                        throw new ArgumentException("Error during reading node.");
+
+                    if ((xmlIn.NodeType == XmlNodeType.EndElement) && (xmlIn.Name == "CardsList"))
+                        break;
+                    if (xmlIn.NodeType == XmlNodeType.EndElement)
+                        continue;
+
+                    if (xmlIn.Name == "Word")
+                    {
+                        try
+                        {
+                            string word = xmlIn.GetAttribute("word");
+                            int points = Convert.ToInt32(xmlIn.GetAttribute("points"));
+                            cards.Add(new WordCard(word, points));
+                        }
+                        catch { }
+                    }
+
+                } while (!xmlIn.EOF);
+
+                xmlIn.Close();
+                input.Close();
+
+                return new CardsList(cards);
+            }
+            catch (Exception ex)
+            {
+                xmlIn.Close();
+                input.Close();
+
+                if (ex is XmlException || ex is ArgumentException)
+                    return new CardsList();
+                else
+                    throw ex;
             }
         }
 
+        // Methods:
+        // List methods
+        public void AddCard(WordCard card)
+        {
+            Cards.Add(card);
+            CurrentCardIndex = 0;
+
+            if (CardsChanged != null)
+                CardsChanged(this, new EventArgs());
+        }
+        
         public void Shuffle()
         {
-            RotateToNormal();
+            foreach (var card in Cards)
+                card.Status = CardStatus.Normal;
 
             List<WordCard> listCopy = new List<WordCard>();
             Cards.ForEach(card => listCopy.Add(card));
@@ -47,27 +139,77 @@ namespace WordCards.Model
                 Cards.Add(listCopy[index]);
                 listCopy.RemoveAt(index);
             }
+
+            CurrentCardIndex = 0;
         }
 
         public void KnowCurrent()
         {
+            if (IsEmpty())
+                return;
             CurrentCard.Points--;
-            UpdateCards();
+            if (CardsChanged != null)
+                CardsChanged(this, new EventArgs());
         }
 
         public void DontKnowCurrent()
         {
+            if (IsEmpty())
+                return;
             CurrentCard.Points++;
-            UpdateCards();
+            if (CardsChanged != null)
+                CardsChanged(this, new EventArgs());
+        }
+        
+        public void Clear()
+        {
+            Cards.Clear();
+            CurrentCardIndex = 0;
+            if (CardsChanged != null)
+                CardsChanged(this, new EventArgs());
+        }
+        
+        public bool IsEmpty()
+        {
+            return Cards.Count == 0;
         }
 
-        private void UpdateCards()
+        public void ChangeCard()
+        {
+            if (IsEmpty())
+                return;
+
+            if (CurrentCard.Status == CardStatus.Reversed)
+            {
+                CurrentCard.Status = CardStatus.Normal;
+                CurrentCardIndex = (CurrentCardIndex + 1) % Cards.Count;
+            }
+            else
+            {
+                CurrentCard.Status = CardStatus.Reversed;
+
+                if (CurrentCardChanged != null)
+                    CurrentCardChanged(null, new EventArgs());
+            }
+        }
+
+        public string GetCurrentCardSide()
+        {
+            if (IsEmpty())
+                return "There are no cards in database!";
+            else
+                return CurrentCard.GetSideText();
+        }
+
+        // Event methods:
+        void UpdateCards(object sender, EventArgs args)
         {
             Cards = Cards.Where(card => card.Points >= 0).ToList();
-            UpdateFile();
+            CurrentCardIndex = 0;
+            UpdateCardsInFile();
         }
 
-        private async void UpdateFile()
+        async void UpdateCardsInFile()
         {
             Stream output = await ApplicationData.Current.LocalFolder.OpenStreamForWriteAsync("words.xml", CreationCollisionOption.ReplaceExisting);
             XmlTextWriter xmlOut = new XmlTextWriter(output, Encoding.Unicode);
@@ -96,99 +238,6 @@ namespace WordCards.Model
                 xmlOut.Close();
                 output.Close();
             }
-        }
-
-        public void Next()
-        {
-            CurrentCardIndex = (CurrentCardIndex + 1) % Cards.Count;
-        }
-
-        public CardsList()
-        {
-            Cards = new List<WordCard>();
-        }
-
-        public CardsList(List<WordCard> cards)
-        {
-            Cards = cards;
-        }
-
-        public void ClearCards()
-        {
-            Cards.Clear();
-        }
-
-        public void AddCard(WordCard card)
-        {
-            Cards.Add(card);
-            UpdateCards();
-        }
-
-        public bool Empty()
-        {
-            return Cards.Count == 0;
-        }
-
-        public static async Task<CardsList> Import()
-        {
-            StorageFile file = await ApplicationData.Current.LocalFolder.CreateFileAsync("words.xml", CreationCollisionOption.OpenIfExists);
-            Stream input = (await file.OpenReadAsync()).AsStreamForRead();
-            XmlTextReader xmlIn = new XmlTextReader(input);
-
-            CardsList result;
-
-            try
-            {
-                xmlIn.WhitespaceHandling = WhitespaceHandling.None;
-
-                xmlIn.MoveToContent();
-
-                if (xmlIn.Name != "CardsList")
-                    throw new ArgumentException("Incorrect file format.");
-
-                List<WordCard> cards = new List<WordCard>();
-
-                string version = xmlIn.GetAttribute(0);
-                do
-                {
-                    if (!xmlIn.Read())
-                        throw new ArgumentException("???");
-
-                    if ((xmlIn.NodeType == XmlNodeType.EndElement) && (xmlIn.Name == "CardsList"))
-                        break;
-                    if (xmlIn.NodeType == XmlNodeType.EndElement)
-                        continue;
-
-                    if (xmlIn.Name == "Word")
-                    {
-                        try
-                        {
-                            string word = xmlIn.GetAttribute("word");
-                            int points = Convert.ToInt32(xmlIn.GetAttribute("points"));
-                            cards.Add(new WordCard(word, points));
-                        }
-                        catch { }
-                    }
-
-                } while (!xmlIn.EOF);
-
-                result = new CardsList(cards);
-            }
-            catch (XmlException)
-            {
-                result = new CardsList();
-            }
-            catch (ArgumentException)
-            {
-                result = new CardsList();
-            }
-            finally
-            {
-                xmlIn.Close();
-                input.Close();
-            }
-
-            return result;
         }
     }
 }

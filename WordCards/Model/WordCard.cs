@@ -39,6 +39,11 @@ namespace WordCards.Model
         public string example { get; set; }
         public List<string> antonyms { get; set; }
         public List<string> synonyms { get; set; }
+
+        public override string ToString()
+        {
+            return definition;
+        }
     }
 
     internal class Meaning
@@ -48,7 +53,7 @@ namespace WordCards.Model
 
         public override string ToString()
         {
-            return "[" + partOfSpeech + "] " + String.Join("\n", definitions.ConvertAll(definition => definition.definition));
+            return "[" + partOfSpeech + "]\n" + String.Join("\n", definitions);
         }
     }
 
@@ -58,33 +63,54 @@ namespace WordCards.Model
         public string origin { get; set; }
         public string phonetic { get; set; }
         public string word { get; set; }
+
+        public override string ToString()
+        {
+            return String.Join('\n', meanings);
+        }
     }
 
     internal class WordCard
     {
         public static int DefaultPoints = 5;
 
-        public string Word { get; set; }
+        // Properties:
         List<DictionaryApiResponceDisiarizer> ApiResult { get; set; }
+        public string Word { get; set; }
+        public int Points { get; set; }
+        public CardStatus Status { get; set; }
         public string Meaning {
             get
             {
-                return String.Join(
-                    '\n',
-                    ApiResult.ConvertAll(
-                        element => String.Join(
-                            '\n',
-                            element.meanings
-                                .ConvertAll(meaning => meaning.ToString())
-                        )
-                    )
-                );
+                return String.Join('\n', ApiResult);
             }
         }
-        public int Points;
-        public CardStatus Status { get; set; }
 
-        private static List<DictionaryApiResponceDisiarizer> LoadTranslation(string word)
+        // Constructors:
+        public WordCard(string word)
+        {
+            Word = word;
+            Status = CardStatus.Normal;
+            ApiResult = LoadTranslation(word);
+
+            Points = DefaultPoints;
+        }
+
+        public WordCard(string word, int points) : this(word)
+        {
+            Points = points;
+        }
+
+        // Methods:
+        public string GetSideText()
+        {
+            if (Status == CardStatus.Normal)
+                return Word;
+            else
+                return Meaning;
+        }
+
+        static List<DictionaryApiResponceDisiarizer> LoadTranslation(string word)
         {
             WebRequest request = WebRequest.Create("https://api.dictionaryapi.dev/api/v2/entries/en/" + word);
 
@@ -107,32 +133,6 @@ namespace WordCards.Model
             response.Close();
 
             return DisiarizedResponce;
-        }
-
-        public WordCard(string word)
-        {
-            Word = word;
-            Status = CardStatus.Normal;
-            ApiResult = LoadTranslation(word);
-
-            Points = DefaultPoints;
-        }
-
-        public WordCard(string word, int points) : this(word)
-        {
-            Points = points;
-        }
-
-        public override string ToString()
-        {
-            if (Status == CardStatus.Normal)
-            {
-                return Word;
-            }
-            else
-            {
-                return Meaning;
-            }
         }
     }
 }
