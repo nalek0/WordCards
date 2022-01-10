@@ -13,27 +13,65 @@
             <RowDefinition />
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
 
         <Grid x:Name="Card"
+              Grid.Row="0"
+              Grid.Column="1"
               HorizontalAlignment="Center"
               VerticalAlignment="Center"
-              Width="500" Height="350"
+              Width="500" Height="300"
               CornerRadius="40"
               Background="#55ffff"
               PointerPressed="ClickedCard">
             <TextBlock x:Name="CardText"
-                       Text="..." FontSize="75"
+                       Text="..." FontSize="18"
+                       TextWrapping="Wrap"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"/>
         </Grid>
 
+        <Button Grid.Row="0"
+                Grid.Column="0"
+                Click="ClickedIKnowIt"
+                Content="I know it!"
+                HorizontalAlignment="Center"
+                Background="LightGreen"
+                Margin="10" />
+
+        <Button Grid.Row="0"
+                Grid.Column="2"
+                Click="ClickedIDontKnowIt"
+                Content="I don't know it..."
+                HorizontalAlignment="Center"
+                Background="LightCoral"
+                Margin="10" />
 
         <Button Grid.Row="1"
+                Grid.Column="0"
                 Click="ClickedShuffle"
                 Content="Shuffle"
                 HorizontalAlignment="Center"
-                Background="Blue"
-                Foreground="White"
+                Background="LightBlue"
+                Margin="10" />
+
+        <TextBox Grid.Row="1"
+                 Grid.Column="1"
+                 Width="400"
+                 Margin="10" 
+                 PlaceholderText="Word to add"
+                 x:Name="NewWord" />
+
+        <Button Grid.Row="1"
+                Grid.Column="2"
+                Click="ClickedAddWord"
+                Content="Add word"
+                HorizontalAlignment="Center"
+                Background="LightGray"
                 Margin="10" />
     </Grid>
 </Page>

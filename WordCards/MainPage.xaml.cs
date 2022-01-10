@@ -22,8 +22,7 @@ namespace WordCards
 {
     public sealed partial class MainPage : Page
     {
-        const string WordsFilePath = "Assets/Data/Words.txt";
-        CardsList CardsList;
+        CardsList ListOfCards;
 
         public MainPage()
         {
@@ -39,36 +38,74 @@ namespace WordCards
                 .SetPreferredMinSize(new Size(400, 200));
         }
 
-        private void initCards()
+        private async void initCards()
         {
-            CardsList = CardsList.ParseFromFile(WordsFilePath);
-            CardsList.Shuffle();
-            ShowCard(CardsList.CurrentCard);
+            ListOfCards = await CardsList.Import();
+            ListOfCards.Shuffle();
+            ShowCurrentCard();
         }
 
         private void ClickedShuffle(object sender, RoutedEventArgs e)
         {
-            CardsList.Shuffle();
-            ShowCard(CardsList.CurrentCard);
+            ListOfCards.Shuffle();
+            ShowCurrentCard();
         }
 
-        private void ShowCard(WordCard card)
+        private void ClickedIKnowIt(object sender, RoutedEventArgs e)
         {
-            CardText.Text = card.ToString();
+            if (ListOfCards.Empty())
+                return;
+            ListOfCards.KnowCurrent();
+        }
+
+        private void ClickedIDontKnowIt(object sender, RoutedEventArgs e)
+        {
+            if (ListOfCards.Empty())
+                return;
+            ListOfCards.DontKnowCurrent();
+        }
+
+        private void ShowCurrentCard()
+        {
+            if (ListOfCards.Empty())
+            {
+                CardText.Text = "No cards in database!";
+            }
+            else
+            {
+                CardText.Text = ListOfCards.CurrentCard.ToString();
+            }
         }
 
         private void ClickedCard(object sender, PointerRoutedEventArgs e)
         {
-            if (CardsList.CurrentCard.Status == CardStatus.Reversed)
+            if (ListOfCards.Empty())
+                return;
+            if (ListOfCards.CurrentCard.Status == CardStatus.Reversed)
             {
-                CardsList.CurrentCard.Status = CardStatus.Normal;
-                ShowCard(CardsList.Next());
+                ListOfCards.CurrentCard.Status = CardStatus.Normal;
+                ListOfCards.Next();
+                ShowCurrentCard();
             }
             else
             {
-                CardsList.CurrentCard.Status = CardStatus.Reversed;
-                ShowCard(CardsList.CurrentCard);
+                ListOfCards.CurrentCard.Status = CardStatus.Reversed;
+                ShowCurrentCard();
             }
+        }
+
+        private void ClickedAddWord(object sender, RoutedEventArgs e)
+        {
+            WordCard newCard;
+            try
+            {
+                string text = NewWord.Text;
+                NewWord.Text = "";
+                newCard = new WordCard(text);
+            }
+            catch { return; }
+
+            ListOfCards.AddCard(newCard);
         }
     }
 }
