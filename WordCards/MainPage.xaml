@@ -43,7 +43,8 @@
                     PointerPressed="ClickedCard"
                     HorizontalAlignment="Stretch" 
                     VerticalAlignment="Stretch"
-                    Background="LightGray">
+                    BorderBrush="#888888"
+                    BorderThickness="3">
             <TextBlock x:Name="WordPanel"
                        Text="..." FontSize="24"
                        TextWrapping="Wrap" />
@@ -82,7 +83,7 @@
             <Button Click="ClickedAddWord"
                 Content="Add word"
                 HorizontalAlignment="Center"
-                Background="LightGray"
+                Background="Gray"
                 Margin="10" />
         </StackPanel>
         
