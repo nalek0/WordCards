@@ -94,9 +94,7 @@ namespace WordCards.Model
             WebResponse response = request.GetResponse();
 
             if (((HttpWebResponse) response).StatusCode != HttpStatusCode.OK)
-            {
                 throw new Exception("Wrong word");
-            }
 
             List<DictionaryApiResponceDisiarizer> DisiarizedResponce;
             using (Stream dataStream = response.GetResponseStream())

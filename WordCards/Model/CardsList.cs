@@ -147,6 +147,7 @@ namespace WordCards.Model
             if (IsEmpty())
                 return;
             CurrentCard.Points--;
+            CurrentCard.Status = CardStatus.Normal;
             if (CurrentCard.Points < 0)
             {
                 Cards.Remove(CurrentCard);
@@ -162,6 +163,7 @@ namespace WordCards.Model
             if (IsEmpty())
                 return;
             CurrentCard.Points++;
+            CurrentCard.Status = CardStatus.Normal;
             CurrentCardIndex++;
             UpdateCardsInFile();
         }

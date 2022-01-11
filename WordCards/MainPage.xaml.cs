@@ -100,7 +100,8 @@ namespace WordCards
                         StackPanel sp = new StackPanel() { Orientation = Orientation.Vertical, Style = (Style) Resources["ResultStyle"] };
                         foreach (var meaning in result.meanings)
                         {
-                            sp.Children.Add(new TextBlock() { Text = meaning.partOfSpeech, FontWeight = FontWeights.Bold });
+                            if (meaning.partOfSpeech != null)
+                                sp.Children.Add(new TextBlock() { Text = meaning.partOfSpeech, FontWeight = FontWeights.Bold });
                             foreach (var defenition in meaning.definitions)
                                 sp.Children.Add(new TextBlock() { Text = defenition.definition, Style = (Style) Resources["ResultDefenitionStyle"] });
                         }
