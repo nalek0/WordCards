@@ -65,7 +65,7 @@ namespace WordCards
 
         void ClickedCard(object sender, PointerRoutedEventArgs e)
         {
-            ListOfCards.ChangeCard();
+            ListOfCards.ReverseCurrentCard();
         }
 
         void ClickedAddWord(object sender, RoutedEventArgs e)

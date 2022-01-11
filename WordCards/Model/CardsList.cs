@@ -14,7 +14,6 @@ namespace WordCards.Model
     internal class CardsList
     {
         // Events:
-        public event EventHandler CardsChanged;
         public event EventHandler CurrentCardChanged;
 
         // Properties:
@@ -22,13 +21,16 @@ namespace WordCards.Model
         int CurrentCardIndex {
             get
             {
-                return index;
+                if (IsEmpty())
+                    return 0;
+                return index % Cards.Count;
             } 
             set
             {
-                if (value < 0 || value > Cards.Count)
-                    throw new ArgumentOutOfRangeException("value");
-                index = value;
+                if (IsEmpty())
+                    index = 0;
+                else
+                    index = value;
                 if (CurrentCardChanged != null)
                     CurrentCardChanged(this, new EventArgs());
             }
@@ -45,7 +47,6 @@ namespace WordCards.Model
         CardsList()
         {
             Cards = new List<WordCard>();
-            CardsChanged += new EventHandler(UpdateCards);
         }
 
         CardsList(List<WordCard> cards) : this()
@@ -116,10 +117,8 @@ namespace WordCards.Model
         public void AddCard(WordCard card)
         {
             Cards.Add(card);
+            UpdateCardsInFile();
             CurrentCardIndex = 0;
-
-            if (CardsChanged != null)
-                CardsChanged(this, new EventArgs());
         }
         
         public void Shuffle()
@@ -148,8 +147,14 @@ namespace WordCards.Model
             if (IsEmpty())
                 return;
             CurrentCard.Points--;
-            if (CardsChanged != null)
-                CardsChanged(this, new EventArgs());
+            if (CurrentCard.Points < 0)
+            {
+                Cards.Remove(CurrentCard);
+                CurrentCardIndex = CurrentCardIndex;
+                UpdateCardsInFile();
+            }
+            else
+                CurrentCardIndex++;
         }
 
         public void DontKnowCurrent()
@@ -157,16 +162,8 @@ namespace WordCards.Model
             if (IsEmpty())
                 return;
             CurrentCard.Points++;
-            if (CardsChanged != null)
-                CardsChanged(this, new EventArgs());
-        }
-        
-        public void Clear()
-        {
-            Cards.Clear();
-            CurrentCardIndex = 0;
-            if (CardsChanged != null)
-                CardsChanged(this, new EventArgs());
+            CurrentCardIndex++;
+            UpdateCardsInFile();
         }
         
         public bool IsEmpty()
@@ -174,7 +171,7 @@ namespace WordCards.Model
             return Cards.Count == 0;
         }
 
-        public void ChangeCard()
+        public void ReverseCurrentCard()
         {
             if (IsEmpty())
                 return;
@@ -182,7 +179,7 @@ namespace WordCards.Model
             if (CurrentCard.Status == CardStatus.Reversed)
             {
                 CurrentCard.Status = CardStatus.Normal;
-                CurrentCardIndex = (CurrentCardIndex + 1) % Cards.Count;
+                CurrentCardIndex++;
             }
             else
             {
@@ -202,13 +199,6 @@ namespace WordCards.Model
         }
 
         // Event methods:
-        void UpdateCards(object sender, EventArgs args)
-        {
-            Cards = Cards.Where(card => card.Points >= 0).ToList();
-            CurrentCardIndex = 0;
-            UpdateCardsInFile();
-        }
-
         async void UpdateCardsInFile()
         {
             Stream output = await ApplicationData.Current.LocalFolder.OpenStreamForWriteAsync("words.xml", CreationCollisionOption.ReplaceExisting);
