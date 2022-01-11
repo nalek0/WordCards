@@ -101,9 +101,9 @@ namespace WordCards
                         foreach (var meaning in result.meanings)
                         {
                             if (meaning.partOfSpeech != null)
-                                sp.Children.Add(new TextBlock() { Text = meaning.partOfSpeech, FontWeight = FontWeights.Bold });
+                                sp.Children.Add(new TextBlock() { Text = String.Format("[{0}]", meaning.partOfSpeech), FontWeight = FontWeights.Bold });
                             foreach (var defenition in meaning.definitions)
-                                sp.Children.Add(new TextBlock() { Text = defenition.definition, Style = (Style) Resources["ResultDefenitionStyle"] });
+                                sp.Children.Add(new TextBlock() { Text = "* " + defenition.definition, Style = (Style) Resources["ResultDefenitionStyle"] });
                         }
                         MeaningsPanel.Children.Add(sp);
                     }
