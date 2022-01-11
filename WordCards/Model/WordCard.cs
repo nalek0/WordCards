@@ -50,11 +50,6 @@ namespace WordCards.Model
     {
         public string partOfSpeech { get; set; }
         public List<Definition> definitions { get; set; }
-
-        public override string ToString()
-        {
-            return "[" + partOfSpeech + "]\n" + String.Join("\n", definitions);
-        }
     }
 
     internal class DictionaryApiResponceDisiarizer
@@ -63,11 +58,6 @@ namespace WordCards.Model
         public string origin { get; set; }
         public string phonetic { get; set; }
         public string word { get; set; }
-
-        public override string ToString()
-        {
-            return String.Join('\n', meanings);
-        }
     }
 
     internal class WordCard
@@ -75,23 +65,17 @@ namespace WordCards.Model
         public static int DefaultPoints = 5;
 
         // Properties:
-        List<DictionaryApiResponceDisiarizer> ApiResult { get; set; }
+        public List<DictionaryApiResponceDisiarizer> ApiResults { get; set; }
         public string Word { get; set; }
         public int Points { get; set; }
         public CardStatus Status { get; set; }
-        public string Meaning {
-            get
-            {
-                return String.Join('\n', ApiResult);
-            }
-        }
 
         // Constructors:
         public WordCard(string word)
         {
             Word = word;
             Status = CardStatus.Normal;
-            ApiResult = LoadTranslation(word);
+            ApiResults = LoadTranslation(word);
 
             Points = DefaultPoints;
         }
@@ -102,13 +86,6 @@ namespace WordCards.Model
         }
 
         // Methods:
-        public string GetSideText()
-        {
-            if (Status == CardStatus.Normal)
-                return Word;
-            else
-                return Meaning;
-        }
 
         static List<DictionaryApiResponceDisiarizer> LoadTranslation(string word)
         {

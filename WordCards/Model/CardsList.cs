@@ -190,14 +190,6 @@ namespace WordCards.Model
             }
         }
 
-        public string GetCurrentCardSide()
-        {
-            if (IsEmpty())
-                return "There are no cards in database!";
-            else
-                return CurrentCard.GetSideText();
-        }
-
         // Event methods:
         async void UpdateCardsInFile()
         {

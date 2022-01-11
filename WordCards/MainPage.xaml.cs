@@ -7,11 +7,13 @@ using System.Text;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
+using Windows.UI.Text;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
+using Windows.UI.Xaml.Documents;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
@@ -85,7 +87,27 @@ namespace WordCards
         // Methods:
         void ShowCurrentCard(object sender, EventArgs args)
         {
-            CardText.Text = ListOfCards.GetCurrentCardSide();
+            MeaningsPanel.Children.Clear();
+            if (ListOfCards.IsEmpty())
+                WordPanel.Text = "There are no words in database!";
+            else
+            {
+                WordPanel.Text = ListOfCards.CurrentCard.Word;
+                if (ListOfCards.CurrentCard.Status == CardStatus.Reversed)
+                {
+                    foreach (var result in ListOfCards.CurrentCard.ApiResults)
+                    {
+                        StackPanel sp = new StackPanel() { Orientation = Orientation.Vertical, Style = (Style) Resources["ResultStyle"] };
+                        foreach (var meaning in result.meanings)
+                        {
+                            sp.Children.Add(new TextBlock() { Text = meaning.partOfSpeech, FontWeight = FontWeights.Bold });
+                            foreach (var defenition in meaning.definitions)
+                                sp.Children.Add(new TextBlock() { Text = defenition.definition, Style = (Style) Resources["ResultDefenitionStyle"] });
+                        }
+                        MeaningsPanel.Children.Add(sp);
+                    }
+                }
+            }
         }
     }
 }

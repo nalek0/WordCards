@@ -8,70 +8,78 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+    <Page.Resources>
+        <Style x:Key="ResultStyle" TargetType="StackPanel">
+            <Setter Property="Margin" Value="10" />
+            <Setter Property="Padding" Value="5" />
+        </Style>
+        <Style x:Key="ResultDefenitionStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="FontStyle" Value="Italic" />
+            <Setter Property="Margin" Value="10,0,0,0" />
+        </Style>
+        <Style x:Key="ButtonStyle" TargetType="Button">
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Padding" Value="5" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+    </Page.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="100"/>
         </Grid.ColumnDefinitions>
 
-        <Grid x:Name="Card"
-              Grid.Row="0"
-              Grid.Column="1"
-              HorizontalAlignment="Center"
-              VerticalAlignment="Center"
-              Width="500" Height="300"
-              CornerRadius="40"
-              Background="#55ffff"
-              PointerPressed="ClickedCard">
-            <TextBlock x:Name="CardText"
-                       Text="..." FontSize="18"
-                       TextWrapping="Wrap"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"/>
-        </Grid>
+        <StackPanel x:Name="CardPanel" 
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="30"
+                    PointerPressed="ClickedCard">
+            <TextBlock x:Name="WordPanel"
+                       Text="..." FontSize="24"
+                       TextWrapping="Wrap" />
+            <StackPanel x:Name="MeaningsPanel" />
+        </StackPanel>
 
-        <Button Grid.Row="0"
-                Grid.Column="0"
-                Click="ClickedIKnowIt"
-                Content="I know it!"
-                HorizontalAlignment="Center"
-                Background="LightGreen"
-                Margin="10" />
+        <StackPanel x:Name="Buttons"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    VerticalAlignment="Center">
+            <Button Content="✅"
+                    Click="ClickedIKnowIt"
+                    Background="LightGreen" 
+                    Style="{StaticResource ButtonStyle}" />
+            <Button Content="❌"
+                    Click="ClickedIDontKnowIt"
+                    Background="LightCoral"
+                    Style="{StaticResource ButtonStyle}" />
+            <Button Content="🔀"
+                    Click="ClickedShuffle"
+                    Background="LightBlue"
+                    Style="{StaticResource ButtonStyle}" />
+        </StackPanel>
 
-        <Button Grid.Row="0"
-                Grid.Column="2"
-                Click="ClickedIDontKnowIt"
-                Content="I don't know it..."
-                HorizontalAlignment="Center"
-                Background="LightCoral"
-                Margin="10" />
-
-        <Button Grid.Row="1"
-                Grid.Column="0"
-                Click="ClickedShuffle"
-                Content="Shuffle"
-                HorizontalAlignment="Center"
-                Background="LightBlue"
-                Margin="10" />
-
-        <TextBox Grid.Row="1"
-                 Grid.Column="1"
-                 Width="400"
+        <StackPanel x:Name="AddNewWordPanel"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center">
+            <TextBox Width="400"
                  Margin="10" 
                  PlaceholderText="Word to add"
                  x:Name="NewWord" />
 
-        <Button Grid.Row="1"
-                Grid.Column="2"
-                Click="ClickedAddWord"
+            <Button Click="ClickedAddWord"
                 Content="Add word"
                 HorizontalAlignment="Center"
                 Background="LightGray"
                 Margin="10" />
+        </StackPanel>
+        
     </Grid>
 </Page>
