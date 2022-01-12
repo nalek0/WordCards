@@ -18,7 +18,7 @@ namespace WordCards.Model
 
         // Properties:
         int index = 0;
-        int CurrentCardIndex {
+        public int CurrentCardIndex {
             get
             {
                 if (IsEmpty())
@@ -33,6 +33,13 @@ namespace WordCards.Model
                     index = value;
                 if (CurrentCardChanged != null)
                     CurrentCardChanged(this, new EventArgs());
+            }
+        }
+        public int NumberOfCards
+        {
+            get
+            {
+                return Cards.Count;
             }
         }
         List<WordCard> Cards { get; set; }

@@ -88,11 +88,17 @@ namespace WordCards
         void ShowCurrentCard(object sender, EventArgs args)
         {
             MeaningsPanel.Children.Clear();
+            WordPanel.Text = "";
+            WordPoints.Text = "";
+            WordCounter.Text = "";
             if (ListOfCards.IsEmpty())
                 WordPanel.Text = "There are no words in database!";
             else
             {
                 WordPanel.Text = ListOfCards.CurrentCard.Word;
+                WordPoints.Text = String.Format("({0} points)", ListOfCards.CurrentCard.Points);
+                WordCounter.Text = String.Format("{0}/{1}", ListOfCards.CurrentCardIndex + 1, ListOfCards.NumberOfCards);
+                
                 if (ListOfCards.CurrentCard.Status == CardStatus.Reversed)
                 {
                     foreach (var result in ListOfCards.CurrentCard.ApiResults)

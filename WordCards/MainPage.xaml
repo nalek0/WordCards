@@ -13,6 +13,12 @@
             <Setter Property="Margin" Value="10" />
             <Setter Property="Padding" Value="5" />
         </Style>
+        <Style x:Key="CommentStyle" TargetType="TextBlock">
+            <Setter Property="Text" Value="" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="Opacity" Value="0.7" />
+            <Setter Property="FontStyle" Value="Oblique" />
+        </Style>
         <Style x:Key="ResultDefenitionStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="18" />
             <Setter Property="Margin" Value="10,0,0,0" />
@@ -37,19 +43,41 @@
             <ColumnDefinition Width="100"/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel x:Name="CardPanel" 
-                    Grid.Row="0" Grid.Column="0"
-                    Margin="10,10,0,10" Padding="10"
-                    PointerPressed="ClickedCard"
-                    HorizontalAlignment="Stretch" 
-                    VerticalAlignment="Stretch"
-                    BorderBrush="#888888"
-                    BorderThickness="3">
-            <TextBlock x:Name="WordPanel"
-                       Text="..." FontSize="24"
-                       TextWrapping="Wrap" />
-            <StackPanel x:Name="MeaningsPanel" />
-        </StackPanel>
+        <Border Grid.Row="0" Grid.Column="0"
+                Margin="10,10,0,10" Padding="10"
+                PointerPressed="ClickedCard"
+                HorizontalAlignment="Stretch" 
+                VerticalAlignment="Stretch"
+                BorderBrush="#888888"
+                Background="Transparent"
+                BorderThickness="3">
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Left"
+                                Grid.Column="0">
+                        <TextBlock x:Name="WordPanel"
+                                   Text="loading..."
+                                   FontSize="24" />
+                        <TextBlock x:Name="WordPoints"
+                                   Margin="20,0,0,0"
+                                   Style="{StaticResource CommentStyle}" />
+                    </StackPanel>
+                    <StackPanel HorizontalAlignment="Right"
+                                Grid.Column="1">
+                        <TextBlock x:Name="WordCounter"
+                                   Style="{StaticResource CommentStyle}" />
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel x:Name="MeaningsPanel" />
+            </StackPanel>
+        </Border>
 
         <StackPanel x:Name="Buttons"
                     Grid.Row="0"
@@ -75,16 +103,14 @@
                     Grid.Column="0"
                     Orientation="Horizontal"
                     HorizontalAlignment="Center">
-            <TextBox Width="400"
-                 Margin="10" 
-                 PlaceholderText="Add a word or a phrase"
-                 x:Name="NewWord" />
+            <TextBox x:Name="NewWord" 
+                     Width="400" Margin="10"
+                     PlaceholderText="Add a word or a phrase" />
 
-            <Button Click="ClickedAddWord"
-                Content="Add word"
-                HorizontalAlignment="Center"
-                Background="Gray"
-                Margin="10" />
+            <Button Content="Add word"
+                    Click="ClickedAddWord"
+                    Background="Gray"
+                    Style="{StaticResource ButtonStyle}"/>
         </StackPanel>
         
     </Grid>
