@@ -65,19 +65,19 @@ namespace WordCards.Model
         public static int DefaultPoints = 5;
 
         // Properties:
-        public List<DictionaryApiResponceDisiarizer> ApiResults { get; set; }
         public string Word { get; set; }
         public int Points { get; set; }
         public CardStatus Status { get; set; }
+        
+        public Task<List<DictionaryApiResponceDisiarizer>> ApiResults { get;  set; }
 
         // Constructors:
         public WordCard(string word)
         {
             Word = word;
             Status = CardStatus.Normal;
-            ApiResults = LoadTranslation(word);
-
             Points = DefaultPoints;
+            ApiResults = LoadTranslation(word);
         }
 
         public WordCard(string word, int points) : this(word)
@@ -87,27 +87,30 @@ namespace WordCards.Model
 
         // Methods:
 
-        static List<DictionaryApiResponceDisiarizer> LoadTranslation(string word)
+        static Task<List<DictionaryApiResponceDisiarizer>> LoadTranslation(string word)
         {
-            WebRequest request = WebRequest.Create("https://api.dictionaryapi.dev/api/v2/entries/en/" + word);
-
-            WebResponse response = request.GetResponse();
-
-            if (((HttpWebResponse) response).StatusCode != HttpStatusCode.OK)
-                throw new Exception("Wrong word");
-
-            List<DictionaryApiResponceDisiarizer> DisiarizedResponce;
-            using (Stream dataStream = response.GetResponseStream())
+            return Task.Run(() =>
             {
-                StreamReader reader = new StreamReader(dataStream);
-                string responseFromServer = reader.ReadToEnd();
-                DisiarizedResponce =
-                    JsonConvert.DeserializeObject<List<DictionaryApiResponceDisiarizer>>(responseFromServer);
-            }
+                WebRequest request = WebRequest.Create("https://api.dictionaryapi.dev/api/v2/entries/en/" + word);
 
-            response.Close();
+                WebResponse response = request.GetResponse();
 
-            return DisiarizedResponce;
+                if (((HttpWebResponse)response).StatusCode != HttpStatusCode.OK)
+                    return null;
+
+                List<DictionaryApiResponceDisiarizer> DisiarizedResponce;
+                using (Stream dataStream = response.GetResponseStream())
+                {
+                    StreamReader reader = new StreamReader(dataStream);
+                    string responseFromServer = reader.ReadToEnd();
+                    DisiarizedResponce =
+                        JsonConvert.DeserializeObject<List<DictionaryApiResponceDisiarizer>>(responseFromServer);
+                }
+
+                response.Close();
+
+                return DisiarizedResponce;
+            });
         }
     }
 }

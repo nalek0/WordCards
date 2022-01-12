@@ -70,22 +70,21 @@ namespace WordCards
             ListOfCards.ReverseCurrentCard();
         }
 
-        void ClickedAddWord(object sender, RoutedEventArgs e)
+        async void ClickedAddWord(object sender, RoutedEventArgs e)
         {
             WordCard newCard;
-            try
-            {
-                string text = NewWord.Text;
-                NewWord.Text = "";
-                newCard = new WordCard(text);
-            }
-            catch { return; }
+            string text = NewWord.Text;
+            NewWord.Text = "";
+            newCard = new WordCard(text);
+            var result = await newCard.ApiResults;
+            if (result == null)
+                return; // It meanis there was an error during loading
 
             ListOfCards.AddCard(newCard);
         }
 
         // Methods:
-        void ShowCurrentCard(object sender, EventArgs args)
+        async void ShowCurrentCard(object sender, EventArgs args)
         {
             MeaningsPanel.Children.Clear();
             WordPanel.Text = "";
@@ -101,15 +100,19 @@ namespace WordCards
                 
                 if (ListOfCards.CurrentCard.Status == CardStatus.Reversed)
                 {
-                    foreach (var result in ListOfCards.CurrentCard.ApiResults)
+                    MeaningsPanel.Children.Add(new TextBlock() { Text = "Word's meaning is loading..." });
+                    var apiResult = await ListOfCards.CurrentCard.ApiResults;
+                    MeaningsPanel.Children.Clear();
+
+                    foreach (var result in apiResult)
                     {
-                        StackPanel sp = new StackPanel() { Orientation = Orientation.Vertical, Style = (Style) Resources["ResultStyle"] };
+                        StackPanel sp = new StackPanel() { Orientation = Orientation.Vertical, Style = (Style)Resources["ResultStyle"] };
                         foreach (var meaning in result.meanings)
                         {
                             if (meaning.partOfSpeech != null)
                                 sp.Children.Add(new TextBlock() { Text = String.Format("[{0}]", meaning.partOfSpeech), FontWeight = FontWeights.Bold });
                             foreach (var defenition in meaning.definitions)
-                                sp.Children.Add(new TextBlock() { Text = "* " + defenition.definition, Style = (Style) Resources["ResultDefenitionStyle"] });
+                                sp.Children.Add(new TextBlock() { Text = "* " + defenition.definition, Style = (Style)Resources["ResultDefenitionStyle"] });
                         }
                         MeaningsPanel.Children.Add(sp);
                     }
