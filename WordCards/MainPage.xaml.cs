@@ -111,8 +111,23 @@ namespace WordCards
                         {
                             if (meaning.partOfSpeech != null)
                                 sp.Children.Add(new TextBlock() { Text = String.Format("[{0}]", meaning.partOfSpeech), FontWeight = FontWeights.Bold });
-                            foreach (var defenition in meaning.definitions)
-                                sp.Children.Add(new TextBlock() { Text = "* " + defenition.definition, Style = (Style)Resources["ResultDefenitionStyle"] });
+                            for (int index  = 0; index < meaning.definitions.Count; index++)
+                            {
+                                var defenition = meaning.definitions[index];
+                                sp.Children.Add(
+                                    new TextBlock() { 
+                                        Text = String.Format("{0}) {1}", index + 1, defenition.definition), 
+                                        Style = (Style) Resources["ResultDefenitionStyle"] 
+                                    }
+                                );
+                                if (defenition.example != null && defenition.example.Length > 0)
+                                    sp.Children.Add(
+                                        new TextBlock() { 
+                                            Text = String.Format("\"{0}\"", defenition.example), 
+                                            Style = (Style) Resources["ResultExamleStyle"] 
+                                        }
+                                    );
+                            }
                         }
                         MeaningsPanel.Children.Add(sp);
                     }
